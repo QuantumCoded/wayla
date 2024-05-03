@@ -46,31 +46,47 @@ wayla.register_provider("best_tool", {
         local node_def = minetest.registered_items[context.node.name]
         local groups = node_def.groups
 
-        local wielded_item = context.player:get_wielded_item()
-        local item_name = wielded_item:get_name()
+        local item_name = context.player:get_wielded_item():get_name()
 
         local best_tool_lut = {
             -- Mineclone
             pickaxey = "Pickaxe",
             axey = "Axe",
             shovely = "Shovel",
+            shearsy = "No Tool",
+            shearsy_wool = "Shears",
             swordy = "Sword",
             swordy_cobweb = "Sword",
 
             -- Minetest
-            -- dig_immediate,
-            crumbly = "Shovel",
-            cracky = "Pickaxe",
-            -- snappy,
-            choppy = "Axe",
-            fleshy = "Sword",
-            -- explody,
+            -- dig_immediate = "No Tool",
+            -- crumbly = "Shovel",
+            -- cracky = "Pickaxe",
+            -- snappy = "No Tool",
+            -- choppy = "Axe",
+            -- fleshy = "Sword",
+            -- explody = "No Tool",
         }
 
         local best_tool = "No Tool"
-        for group, _ in pairs(groups) do
+        local wield_level = 0
+        local break_level = 0
+
+        for group, level in pairs(groups) do
             if best_tool_lut[group] then
                 best_tool = best_tool_lut[group]
+
+                local wielded_item = minetest.registered_items[item_name]
+                local diggroups = wielded_item._mcl_diggroups
+
+                if diggroups and diggroups[group] then
+                    break_level = level
+                    wield_level = minetest
+                        .registered_items[item_name]
+                        ._mcl_diggroups[group]
+                        .level
+                end
+
                 break
             end
         end
@@ -84,6 +100,11 @@ wayla.register_provider("best_tool", {
                 item_name,
                 string.lower(best_tool)
             ) > 0
+            and wield_level >= break_level
+
+        if not is_correct and wield_level < break_level then
+            best_tool = best_tool .. " (level " .. break_level .. ")"
+        end
 
         best_tool = is_correct
             and minetest.colorize("lightgreen", best_tool)

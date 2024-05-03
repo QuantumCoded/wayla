@@ -44,7 +44,7 @@ local function get_node_image(node_name)
         return node.inventory_image .. "^[resize:146x146", "node", node
     elseif node.inventory_image ~= "" then
         return node.inventory_image .. "^[resize:16x16", "craft_item", node
-    else 
+    else
         tiles[3] = tiles[3] or tiles[1]
         tiles[6] = tiles[6] or tiles[3]
 
