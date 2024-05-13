@@ -44,9 +44,19 @@ wayla.register_provider("best_tool", {
 
     get_data = function(context)
         local node_def = minetest.registered_items[context.node.name]
+
+        if node_def == nil then
+            return
+        end
+
         local groups = node_def.groups
 
         local item_name = context.player:get_wielded_item():get_name()
+        local wielded_item = minetest.registered_items[item_name]
+
+        if wielded_item == nil then
+            return
+        end
 
         local best_tool_lut = {
             -- Mineclone
@@ -76,7 +86,6 @@ wayla.register_provider("best_tool", {
             if best_tool_lut[group] then
                 best_tool = best_tool_lut[group]
 
-                local wielded_item = minetest.registered_items[item_name]
                 local diggroups = wielded_item._mcl_diggroups
 
                 if diggroups and diggroups[group] then
@@ -91,7 +100,6 @@ wayla.register_provider("best_tool", {
             end
         end
 
-        -- TODO: this should correctly account for tool levels
         local is_correct =
             groups.handy
             or best_tool == "No Tool"
