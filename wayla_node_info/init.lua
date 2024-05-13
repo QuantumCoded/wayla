@@ -39,11 +39,18 @@ local function get_node_image(node_name)
 
     if tiles.animation then
         -- TODO: support animated images
-        return
+    elseif node.palette then
+        return {
+            item_image = node_name,
+        }
     elseif node.inventory_image:sub(1, 14) == "[inventorycube" then
-        return node.inventory_image .. "^[resize:146x146", "node", node
+        return {
+            image = node.inventory_image .. "^[resize:146x146", "node", node,
+        }
     elseif node.inventory_image ~= "" then
-        return node.inventory_image .. "^[resize:16x16", "craft_item", node
+        return {
+            image = node.inventory_image .. "^[resize:16x16", "craft_item", node,
+        }
     else
         tiles[3] = tiles[3] or tiles[1]
         tiles[6] = tiles[6] or tiles[3]
@@ -58,7 +65,9 @@ local function get_node_image(node_name)
             tiles[6] = tiles[6].name
         end
 
-        return inventorycube(tiles[1], tiles[6], tiles[3]), "node", node
+        return {
+            image = inventorycube(tiles[1], tiles[6], tiles[3]),
+        }
     end
 end
 
@@ -74,11 +83,10 @@ wayla.register_element("node_info", {
         local data = provider.get_data(context)
 
         local content = {}
-        local x_offset = 0
+        local x_offset = "0c"
         local height = "0.75c"
 
-        if data.image then
-            ---@diagnostic disable-next-line:cast-local-type
+        if data.image and data.image.image then
             x_offset = "0.85c"
             table.insert(content, {
                 type = "image",
@@ -86,7 +94,19 @@ wayla.register_element("node_info", {
                 y = 0,
                 w = "0.75i",
                 h = "0.75i",
-                texture_name = data.image,
+                texture_name = data.image.image,
+            })
+        end
+
+        if data.image and data.image.item_image then
+            x_offset = "0.85c"
+            table.insert(content, {
+                type = "item_image",
+                x = 0,
+                y = 0,
+                w = "0.75i",
+                h = "0.75i",
+                item_name = data.image.item_image,
             })
         end
 
@@ -108,9 +128,11 @@ wayla.register_provider("node_info", {
     element = "node_info",
     get_data = function(context)
         local node_name = context.node.name
+        local node = minetest.registered_nodes[node_name]
 
         local description =
-            minetest.registered_nodes[node_name].description
+            node.short_description
+            or node.description
             or node_name
 
         return {
