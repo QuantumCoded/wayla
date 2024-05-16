@@ -65,6 +65,10 @@ local function get_node_image(node_name)
             tiles[6] = tiles[6].name
         end
 
+        if not (tiles[1] and tiles[3] and tiles[6]) then
+            return
+        end
+
         return {
             image = inventorycube(tiles[1], tiles[6], tiles[3]),
         }
