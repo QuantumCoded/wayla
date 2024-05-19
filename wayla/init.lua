@@ -287,7 +287,7 @@ minetest.register_chatcommand("wayla", {
 minetest.register_globalstep(function()
     for name, wayla_player in pairs(wayla.players) do
         if not wayla_player.enable then
-            break
+            goto continue
         end
 
         local player = wayla_player.player
@@ -304,7 +304,7 @@ minetest.register_globalstep(function()
             meta:set_int("wayla:pointed_x", 0)
             meta:set_int("wayla:pointed_y", 0)
             meta:set_int("wayla:pointed_z", 0)
-            return
+            goto continue
         end
 
         local pointed_node = minetest.get_node(pointed_pos)
@@ -346,7 +346,7 @@ minetest.register_globalstep(function()
             not needs_update
             and wayla.players[name].show
         then
-            return
+            goto continue
         end
 
         -- update metadata to store last updated node's info
@@ -356,5 +356,7 @@ minetest.register_globalstep(function()
         meta:set_int("wayla:pointed_z", pointed_pos.z)
 
         wayla.draw(player, context)
+
+        ::continue::
     end
 end)
